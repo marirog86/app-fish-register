@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestión de Esturiones</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+
+    <h1>Gestión de Esturiones 🐟</h1>
+
+    <h2>Registrar bajas</h2>
+    <form id="form-bajas">
+        <input type="date" name="fecha" required>
+        <input type="number" name="cantidad" placeholder="Cantidad de bajas" required>
+        <input type="number" name="pileta" placeholder="N° de pileta" required>
+        <button type="submit">Registrar</button>
+    </form>
+
+    <h2>Registrar altas</h2>
+    <form id="form-altas">
+        <input type="date" name="fecha" required>
+        <input type="number" name="cantidad" placeholder="Cantidad de altas" required>
+        <input type="number" name="pileta" placeholder="N° de pileta" required>
+        <button type="submit">Registrar</button>
+    </form>
+
+    <h2>Dashboard 📊</h2>
+    <div class="dashboard">
+        <div class="card">
+            <h3>Mortalidad por pileta</h3>
+            <div class="data" id="mortalidad-pileta"></div>
+        </div>
+        <div class="card">
+            <h3>Total de peces por pileta</h3>
+            <div class="data" id="total-pileta"></div>
+        </div>
+        <div class="card">
+            <h3>Mortalidad por día</h3>
+            <div class="data" id="mortalidad-dia"></div>
+        </div>
+        <div class="card">
+            <h3>Total general de peces</h3>
+            <div class="data" id="total-general"></div>
+        </div>
+    </div>
+
+    <div style="margin-top: 1rem;">
+        <button onclick="descargarDatos()" class="boton-exportar">
+            💾 Descargar datos (.json)
+        </button>
+    </div>
+
+    <button onclick="descargarCSV()" class="descargar-csv">
+        📄 Descargar CSV
+    </button>
+
+    <div style="margin-top: 1rem;">
+        <label class="importar-datos">
+            📂 Restaurar datos (.json)
+            <input type="file" id="importar-json" accept=".json" style="display: none;">
+        </label>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <button onclick="resetearDatos()" class="boton-resetear">
+            🧹 Reiniciar datos
+        </button>
+    </div>
+
+    <script src="./script.js"></script>
+</body>
+
+</html>
