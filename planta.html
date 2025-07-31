@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planta - Piletas</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="date"] {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button {
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #6a5acd;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            padding: 1rem;
+            margin: 0.5rem;
+            display: inline-block;
+            width: 180px;
+            vertical-align: top;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Gestión de Piletas - Planta</h1>
+    <a href="./index.html">Ir a Incubación</a>
+    <div class="form-section">
+        <form id="form-altas">
+            <input type="number" placeholder="n° pileta" name="pileta" required />
+            <input type="number" placeholder="cantidad altas" name="cantidad" required />
+            <input type="text" placeholder="zafra" name="zafra" required />
+            <button type="submit">Registrar Altas</button>
+        </form>
+
+        <form id="form-bajas">
+            <input type="number" placeholder="n° pileta" name="pileta" required />
+            <input type="number" placeholder="cantidad bajas" name="cantidad" required />
+            <input type="date" name="fecha" required />
+            <button type="submit">Registrar Bajas</button>
+        </form>
+
+        <form id="form-traslado">
+            <input type="number" placeholder="pileta origen" name="origen" required />
+            <input type="number" placeholder="pileta destino" name="destino" required />
+            <input type="number" placeholder="cantidad a trasladar" name="cantidad" required />
+            <input type="date" name="fecha" required />
+            <button type="submit">Trasladar</button>
+        </form>
+
+        <form id="form-peso">
+            <input type="number" placeholder="n° pileta" name="pileta" required />
+            <input type="number" placeholder="peso promedio" name="peso" required />
+            <input type="date" name="fecha" required />
+            <button type="submit">Registrar Peso</button>
+        </form>
+
+        <form id="form-reset-pileta">
+            <input type="number" placeholder="n° pileta" name="pileta" required />
+            <button type="submit">Resetear Pileta</button>
+        </form>
+
+        <button id="reset-all">Resetear Info</button>
+    </div>
+
+    <div id="dashboard"></div>
+
+    <!-- Dentro del <script> al final del archivo -->
+    <script>
+        const SECTOR = "planta";
+        const STORAGE_KEY = `piletas_${SECTOR}`;
+        let piletas = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+        if (!piletas) {
+            // Inicializar piletas vacías del 1 al 10
+            piletas = {};
+            for (let i = 1; i <= 10; i++) {
+                piletas[i] = { cantidad: 0, zafra: "", peso: null };
+            }
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(piletas));
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById("dashboard");
+            container.innerHTML = "";
+
+            const ordenadas = Object.keys(piletas).sort((a, b) => Number(a) - Number(b));
+            ordenadas.forEach((id) => {
+                const { cantidad, zafra, peso } = piletas[id];
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+        <strong>Pileta ${id}</strong><br>
+        Cantidad: ${cantidad}<br>
+        Zafra: ${zafra || "-"}<br>
+        Peso Promedio: ${peso ?? "-"}gr
+      `;
+                container.appendChild(card);
+            });
+        }
+
+        function attachFormResetHandler(id, handler) {
+            const form = document.getElementById(id);
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                handler(new FormData(e.target));
+                e.target.reset();
+            });
+        }
+
+        attachFormResetHandler("form-altas", (data) => {
+            const id = data.get("pileta");
+            const cantidad = parseInt(data.get("cantidad"));
+            const zafra = data.get("zafra");
+
+            if (!piletas[id]) piletas[id] = { cantidad: 0, zafra: "", peso: null };
+            piletas[id].cantidad += cantidad;
+            piletas[id].zafra = zafra;
+            saveData();
+            renderDashboard();
+        });
+
+        attachFormResetHandler("form-bajas", (data) => {
+            const id = data.get("pileta");
+            const cantidad = parseInt(data.get("cantidad"));
+
+            if (piletas[id]) {
+                piletas[id].cantidad -= cantidad;
+                if (piletas[id].cantidad < 0) piletas[id].cantidad = 0;
+                saveData();
+                renderDashboard();
+            }
+        });
+
+        attachFormResetHandler("form-traslado", (data) => {
+            const origen = data.get("origen");
+            const destino = data.get("destino");
+            const cantidad = parseInt(data.get("cantidad"));
+
+            if (!piletas[origen]) piletas[origen] = { cantidad: 0, zafra: "", peso: null };
+            if (!piletas[destino]) piletas[destino] = { cantidad: 0, zafra: "", peso: null };
+
+            piletas[origen].cantidad -= cantidad;
+            if (piletas[origen].cantidad < 0) piletas[origen].cantidad = 0;
+            piletas[destino].cantidad += cantidad;
+
+            saveData();
+            renderDashboard();
+        });
+
+        attachFormResetHandler("form-peso", (data) => {
+            const id = data.get("pileta");
+            const peso = parseFloat(data.get("peso"));
+            if (!piletas[id]) piletas[id] = { cantidad: 0, zafra: "", peso: null };
+            piletas[id].peso = peso;
+            saveData();
+            renderDashboard();
+        });
+
+        attachFormResetHandler("form-reset-pileta", (data) => {
+            const id = data.get("pileta");
+            delete piletas[id];
+            saveData();
+            renderDashboard();
+        });
+
+        document.getElementById("reset-all").addEventListener("click", () => {
+            if (confirm("¿Estás seguro de eliminar toda la información?")) {
+                piletas = {};
+                for (let i = 1; i <= 10; i++) {
+                    piletas[i] = { cantidad: 0, zafra: "", peso: null };
+                }
+                saveData();
+                renderDashboard();
+            }
+        });
+
+        renderDashboard();
+    </script>
+
+</body>
+
+</html>

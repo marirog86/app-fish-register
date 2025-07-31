@@ -1,4 +1,5 @@
 
+
 let bajas = JSON.parse(localStorage.getItem("bajas")) || [];
 let altas = JSON.parse(localStorage.getItem("altas")) || [];
 
@@ -33,16 +34,19 @@ function renderDashboard() {
 
     document.getElementById("mortalidad-pileta").innerHTML =
         Object.entries(mortalidadPorPileta)
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
             .map(([k, v]) => `Pileta ${k}: ${v}`)
             .join("<br>");
 
     document.getElementById("total-pileta").innerHTML =
         Object.entries(totalPorPileta)
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
             .map(([k, v]) => `Pileta ${k}: ${v}`)
             .join("<br>");
 
     document.getElementById("mortalidad-dia").innerHTML =
         Object.entries(mortalidadPorDia)
+            .sort((a, b) => new Date(a[0]) - new Date(b[0]))
             .map(([k, v]) => `${k}: ${v}`)
             .join("<br>");
 
